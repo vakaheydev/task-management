@@ -1,0 +1,13 @@
+server:
+  port: 8088
+
+spring:
+  kafka:
+    bootstrap-servers: "localhost:9092"
+
+
+app:
+  connection:
+    url: 'http://localhost:8080/api'
+  notification:
+    enabled: true

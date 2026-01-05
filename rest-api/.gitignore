@@ -2,7 +2,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.kotlin
+<<<<<<< HEAD
+*.jar
+docker/remote/.env
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -12,11 +14,6 @@ target/
 *.iws
 *.iml
 *.ipr
-
-.env
-
-*.jar
-
 application.properties
 
 ### Eclipse ###

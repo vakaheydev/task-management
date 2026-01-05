@@ -1,0 +1,74 @@
+services:
+  rest-api:
+    container_name: rest-api
+    build: rest-api
+    image: vakadev/daily-rest-api:latest
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: vaka_daily_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: 12345
+
+      NOTIFICATION_ENABLED: true
+      TG_BINDING_ENABLED: true
+
+      REST_API_PORT: 8080
+
+      TG_BOT_HOST: tg-bot
+      TG_BOT_PORT: 8889
+      TG_BOT_ENABLED: true
+
+    # Проброс порта можно убрать, чтобы запретить использование REST API вне localhost
+    ports:
+      - "${REST_API_PORT}:8080"
+    depends_on:
+      - db
+    
+    
+  mvc:
+    container_name: mvc
+    build: mvc
+    image: vakadev/daily-mvc:latest
+    environment:
+      REST_API_HOST: rest-api
+      REST_API_PORT: 8080
+
+      MVC_PORT: 8081
+    ports:
+      - "${MVC_PORT}:8081"
+    depends_on:
+      - rest-api
+   
+  tg-bot:
+    container_name: tg-bot
+    build: tg-bot
+    image: vakadev/daily-tg-bot:latest
+    environment:
+      REST_API_HOST: rest-api
+      REST_API_PORT: 8080
+
+      TG_BOT_ENABLED: true
+      TG_BOT_PORT: 8889
+    ports:
+      - "${TG_BOT_PORT}:8888"
+    depends_on:
+      - rest-api
+    
+
+  db:
+    container_name: db
+    build: db
+    image: vakadev/daily-db:latest
+    restart: always
+    environment:
+      POSTGRES_DB: vaka_daily_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  
+volumes:
+  postgres:

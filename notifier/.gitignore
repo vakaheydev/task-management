@@ -2,7 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.kotlin
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -13,11 +12,7 @@ target/
 *.iml
 *.ipr
 
-.env
-
-*.jar
-
-application.properties
+application.yaml
 
 ### Eclipse ###
 .apt_generated

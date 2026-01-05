@@ -1,0 +1,44 @@
+# ============================
+#           Spring
+# ============================
+
+# ============================
+#           Server
+# ============================
+server.port=${REST_API_PORT:8080}
+
+# ============================
+#         Data Source
+# ============================
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# ============================
+#             JPA
+# ============================
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.properties.hibernate.event.merge.entity_copy_observer=allow
+
+# ============================
+#           Logging
+# ============================
+logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=WARN
+logging.level.org.springframework.http.converter.json=DEBUG
+logging.level.com.vaka.daily=DEBUG
+
+# ============================
+#           Telegram
+# ============================
+telegram.bot.url=http://${TG_BOT_HOST:localhost}:${TG_BOT_PORT:8889}/api
+telegram.enabled=${TG_BOT_ENABLED:true}
+telegram.binding.enabled=${TG_BINDING_ENABLED:true}
+
+# ============================
+#         Notification
+# ============================
+notificaton.enabled=${NOTIFICATION_ENABLED:true}
+
+
+
