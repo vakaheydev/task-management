@@ -11,5 +11,6 @@ public class Notification {
     private String message;
     private String chanel;
     private String chanelUserId;
+    private Integer taskId;
     private LocalDateTime timestamp;
 }

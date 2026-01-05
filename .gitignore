@@ -28,6 +28,8 @@ application.properties
 .springBeans
 .sts4-cache
 
+__pycache__/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

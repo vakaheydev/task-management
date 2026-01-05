@@ -11,4 +11,5 @@ public interface TaskNotificationService extends CommonService<TaskNotification>
     TaskNotification getByTaskId(Integer taskId);
     @Transactional
     List<Task> getTasksForNotification();
+    TaskNotification updateTaskNotification(Integer taskId, TaskNotification taskNotification);
 }

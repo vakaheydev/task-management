@@ -6,14 +6,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class DateTimeUtil {
-    public static int getDaysFrom(LocalDateTime dateTime) {
+    public static int getDaysFromNowTo(LocalDateTime dateTime) {
         long days = ChronoUnit.DAYS.between(LocalDate.now(), dateTime.toLocalDate());
-        return (int) days;
-    }
-
-    public static int getDaysTo(LocalDateTime dateTime) {
-        long days = ChronoUnit.DAYS.between(LocalDate.now(), dateTime.toLocalDate());
-        return (int) days;
+        return Math.abs((int) days);
     }
 
     public static long getMinutesTo(LocalDateTime dateTime) {

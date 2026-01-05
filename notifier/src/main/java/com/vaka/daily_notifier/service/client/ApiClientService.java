@@ -130,6 +130,31 @@ public class ApiClientService {
         }
     }
 
+    public TaskNotification updateNotificationByTaskId(int taskId, TaskNotification taskNotification) {
+        String response;
+        try {
+            response = restClient.put()
+                    .uri("/task/" + taskId + "/notification")
+                    .body(taskNotification)
+                    .retrieve()
+                    .body(String.class);
+        } catch (Exception exception) {
+            log.error("Exception while updating task notification: {}", exception.getClass().getSimpleName());
+            return null;
+        }
+
+        if (response == null || response.isBlank()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.readValue(response, TaskNotification.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse task notification response: {}", e.getMessage());
+            return null;
+        }
+    }
+
     public TaskNotification getTaskNotificationByTaskId(int taskId) {
         String response = "";
         try {

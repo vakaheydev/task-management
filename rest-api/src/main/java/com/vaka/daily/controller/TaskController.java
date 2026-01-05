@@ -1,6 +1,7 @@
 package com.vaka.daily.controller;
 
 import com.vaka.daily.domain.Task;
+import com.vaka.daily.domain.TaskNotification;
 import com.vaka.daily.domain.dto.TaskDto;
 import com.vaka.daily.domain.mapper.TaskMapper;
 import com.vaka.daily.exception.ValidationException;
@@ -44,6 +45,19 @@ public class TaskController {
     public ResponseEntity<?> getByIdNotification(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(taskNotificationService.getByTaskId(id));
     }
+
+    @PutMapping("/{id}/notification")
+    public ResponseEntity<?> updateNotification(@PathVariable("id") Integer id,
+                                                @RequestBody @Valid TaskNotification taskNotification,
+                                                BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
+        TaskNotification updated = taskNotificationService.updateTaskNotification(id, taskNotification);
+        return ResponseEntity.ok(updated);
+    }
+
 
 //    @GetMapping("/search")
 //    public ResponseEntity<?> search(@RequestParam(name = "name", required = false) String name,

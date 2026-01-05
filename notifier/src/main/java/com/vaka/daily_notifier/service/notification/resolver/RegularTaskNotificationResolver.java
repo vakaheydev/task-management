@@ -5,7 +5,8 @@ import com.vaka.daily_notifier.domain.TaskNotification;
 
 import java.time.LocalDateTime;
 
-import static com.vaka.daily_notifier.domain.util.DateTimeUtil.*;
+import static com.vaka.daily_notifier.domain.util.DateTimeUtil.getDaysFromNowTo;
+import static com.vaka.daily_notifier.domain.util.DateTimeUtil.getMinutesTo;
 
 public class RegularTaskNotificationResolver implements NotificationResolver {
     @Override
@@ -15,13 +16,13 @@ public class RegularTaskNotificationResolver implements NotificationResolver {
         }
 
         LocalDateTime lastNotifiedAt = taskNotification.getLastNotifiedAt();
-        int daysFromLastNotified = getDaysFrom(lastNotifiedAt);
+        int daysFromLastNotified = getDaysFromNowTo(lastNotifiedAt);
 
         if (daysFromLastNotified < 1) {
             return false;
         }
 
-        int daysToDeadLine = getDaysTo(task.getDeadline());
+        int daysToDeadLine = getDaysFromNowTo(task.getDeadline());
         long minutesToDeadLine = getMinutesTo(task.getDeadline());
 
         return daysToDeadLine == 1

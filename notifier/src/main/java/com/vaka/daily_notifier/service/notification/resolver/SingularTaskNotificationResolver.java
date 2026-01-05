@@ -5,7 +5,7 @@ import com.vaka.daily_notifier.domain.TaskNotification;
 
 import java.time.LocalDateTime;
 
-import static com.vaka.daily_notifier.domain.util.DateTimeUtil.getDaysFrom;
+import static com.vaka.daily_notifier.domain.util.DateTimeUtil.getDaysFromNowTo;
 
 public class SingularTaskNotificationResolver implements NotificationResolver {
     @Override
@@ -15,7 +15,7 @@ public class SingularTaskNotificationResolver implements NotificationResolver {
         }
 
         LocalDateTime lastNotifiedAt = taskNotification.getLastNotifiedAt();
-        int daysFromLastNotified = getDaysFrom(lastNotifiedAt);
+        int daysFromLastNotified = getDaysFromNowTo(lastNotifiedAt);
 
         return daysFromLastNotified >= 1;
     }

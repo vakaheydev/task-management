@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskNotificationServiceImpl implements TaskNotificationService {
@@ -26,6 +27,21 @@ public class TaskNotificationServiceImpl implements TaskNotificationService {
     @Override
     public TaskNotification getById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new TaskNotificationNotFoundException("id", id));
+    }
+
+    @Override
+    public TaskNotification updateTaskNotification(Integer taskId, TaskNotification taskNotification) {
+        Optional<TaskNotification> optionalTaskNotification = repository.findByTaskId(taskId);
+        if (optionalTaskNotification.isPresent()) {
+            TaskNotification existingNotification = optionalTaskNotification.get();
+            existingNotification.setLastNotifiedAt(taskNotification.getLastNotifiedAt());
+            repository.save(existingNotification);
+            return existingNotification;
+        } else {
+            taskNotification.setTask(Task.builder().id(taskId).build());
+            repository.save(taskNotification);
+            return taskNotification;
+        }
     }
 
     @Override
