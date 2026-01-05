@@ -57,6 +57,6 @@ public class ExceptionAdvice {
             msg = "SQL exception";
         }
 
-        return msg;
+        return "Unexpected exception";
     }
 }
