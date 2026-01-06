@@ -1,8 +1,9 @@
 INSERT INTO user_type (user_type_name)
-VALUES ('user'),
-       ('vip'),
-       ('admin'),
-       ('developer');
+VALUES ('USER'),
+       ('VIP'),
+       ('NOTIFIER'),
+       ('ADMIN'),
+       ('DEVELOPER');
 
 INSERT INTO daily_user (user_login, user_password, user_first_name, user_second_name,
                         user_patronymic, user_telegram_id, id_user_type)

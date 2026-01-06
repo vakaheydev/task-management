@@ -5,6 +5,8 @@ import com.vaka.daily.domain.TaskNotification;
 import com.vaka.daily.exception.notfound.TaskNotFoundException;
 import com.vaka.daily.exception.notfound.TaskNotificationNotFoundException;
 import com.vaka.daily.repository.TaskNotificationRepository;
+import com.vaka.daily.security.SecurityUtils;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,60 +23,79 @@ public class TaskNotificationServiceImpl implements TaskNotificationService {
 
     @Override
     public List<TaskNotification> getAll() {
-        return repository.findAll();
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return repository.findAll();
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification getById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new TaskNotificationNotFoundException("id", id));
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return repository.findById(id).orElseThrow(() -> new TaskNotificationNotFoundException("id", id));
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification updateTaskNotification(Integer taskId, TaskNotification taskNotification) {
-        Optional<TaskNotification> optionalTaskNotification = repository.findByTaskId(taskId);
-        if (optionalTaskNotification.isPresent()) {
-            TaskNotification existingNotification = optionalTaskNotification.get();
-            existingNotification.setLastNotifiedAt(taskNotification.getLastNotifiedAt());
-            repository.save(existingNotification);
-            return existingNotification;
-        } else {
-            taskNotification.setTask(Task.builder().id(taskId).build());
-            repository.save(taskNotification);
-            return taskNotification;
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            Optional<TaskNotification> optionalTaskNotification = repository.findByTaskId(taskId);
+            if (optionalTaskNotification.isPresent()) {
+                TaskNotification existingNotification = optionalTaskNotification.get();
+                existingNotification.setLastNotifiedAt(taskNotification.getLastNotifiedAt());
+                repository.save(existingNotification);
+                return existingNotification;
+            } else {
+                taskNotification.setTask(Task.builder().id(taskId).build());
+                repository.save(taskNotification);
+                return taskNotification;
+            }
         }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification getByTaskId(Integer taskId) {
-        return repository.findByTaskId(taskId).orElseThrow(() -> new TaskNotFoundException("id", taskId));
+        TaskNotification taskNotification = repository.findByTaskId(taskId).orElseThrow(() -> new TaskNotFoundException("id", taskId));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || taskNotification.getTask().getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            return taskNotification;
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification create(TaskNotification entity) {
-        return repository.save(entity);
+        if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getTask().getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            return repository.save(entity);
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification updateById(Integer id, TaskNotification entity) {
-        if (!repository.existsById(id)) {
-            throw new TaskNotificationNotFoundException("id", id);
-        }
-
+        getByTaskId(id);
         entity.setId(id);
         return repository.save(entity);
     }
 
     @Override
     public void deleteById(Integer id) {
-        if (!repository.existsById(id)) {
-            throw new TaskNotificationNotFoundException("id", id);
-        }
-
+        getByTaskId(id);
         repository.deleteById(id);
     }
 
     @Override
     public List<Task> getTasksForNotification() {
-        return repository.findTasksForNotification(LocalDateTime.now());
+        if (SecurityUtils.currentUserHasRole("NOTIFIER")) {
+            return repository.findTasksForNotification(LocalDateTime.now());
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 }

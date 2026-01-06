@@ -3,57 +3,72 @@ package com.vaka.daily.service.domain;
 import com.vaka.daily.domain.Task;
 import com.vaka.daily.exception.notfound.TaskNotFoundException;
 import com.vaka.daily.repository.TaskRepository;
+import com.vaka.daily.security.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
-    private final ScheduleService scheduleService;
-    private final TaskTypeService taskTypeService;
 
-    public TaskServiceImpl(TaskRepository taskRepository, ScheduleService scheduleService,
-                           TaskTypeService taskTypeService) {
+    public TaskServiceImpl(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.scheduleService = scheduleService;
-        this.taskTypeService = taskTypeService;
     }
 
     @Override
     public List<Task> getAll() {
-        return taskRepository.findAll();
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return taskRepository.findAll();
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Task getById(Integer id) {
-        var optional = taskRepository.findById(id);
-        return optional.orElseThrow(() -> new TaskNotFoundException("id", id));
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("id", id));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            return task;
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Task create(Task entity) {
-        return taskRepository.save(entity);
+        if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            return taskRepository.save(entity);
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Task updateById(Integer id, Task entity) {
-        if (!taskRepository.existsById(id)) {
-            throw new TaskNotFoundException("id", id);
+        if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            if (!taskRepository.existsById(id)) {
+                throw new TaskNotFoundException("id", id);
+            }
+
+            entity.setId(id);
+            return taskRepository.save(entity);
         }
 
-        entity.setId(id);
-        return taskRepository.save(entity);
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public void deleteById(Integer id) {
-        if (!taskRepository.existsById(id)) {
-            throw new TaskNotFoundException("id", id);
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("id", id));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+            taskRepository.deleteById(id);
         }
 
-        taskRepository.deleteById(id);
+        throw new AuthorizationDeniedException("Access denied");
     }
 }

@@ -6,9 +6,12 @@ import com.vaka.daily.domain.UserType;
 import com.vaka.daily.domain.dto.UserDto;
 import com.vaka.daily.exception.notfound.UserNotFoundException;
 import com.vaka.daily.repository.UserRepository;
+import com.vaka.daily.security.SecurityUtils;
 import com.vaka.daily.telegram.TelegramClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,27 +37,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAll() {
-        return userRepository.findAll();
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return userRepository.findAll();
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
+        }
     }
 
     @Override
     public User getById(Integer id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("id", id));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || SecurityUtils.currentUser().getId().equals(id)) {
+            return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("id", id));
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public User getByUniqueName(String login) {
-        return userRepository.findByLogin(login).orElseThrow(() -> new UserNotFoundException("name", login));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || SecurityUtils.currentUser().getUsername().equals(login)) {
+            return userRepository.findByLogin(login).orElseThrow(() -> new UserNotFoundException("name", login));
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public User getByTgId(Long tgId) {
-        return userRepository.findByTelegramId(tgId).orElseThrow(() -> new UserNotFoundException("telegramId", tgId));
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return userRepository.findByTelegramId(tgId).orElseThrow(() -> new UserNotFoundException("telegramId", tgId));
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public List<User> getByUserTypeName(String userTypeName) {
-        return userRepository.findByUserTypeName(userTypeName);
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return userRepository.findByUserTypeName(userTypeName);
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -101,11 +124,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("id", id);
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            if (!userRepository.existsById(id)) {
+                throw new UserNotFoundException("id", id);
+            }
+            userRepository.deleteById(id);
         }
 
-        userRepository.deleteById(id);
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     private User convertFromDTO(UserDto userDTO) {

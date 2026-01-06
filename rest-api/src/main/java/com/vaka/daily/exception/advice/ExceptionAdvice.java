@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +33,15 @@ public class ExceptionAdvice {
         if (ex.getClass().getSimpleName().contains("NotFoundException")) {
             status = 404;
         }
+
+        else if (ex.getClass().getSimpleName().contains("SecurityException")) {
+            status = 403;
+        }
+
+        else if (ex.getClass().getSimpleName().contains("AuthorizationDeniedException")) {
+            status = 403;
+        }
+
         else {
             status = STATUS_MAP.getOrDefault(ex.getClass().getSimpleName(), 400);
         }
@@ -47,7 +58,7 @@ public class ExceptionAdvice {
     }
 
     public String resolveMessage(Exception ex) {
-        String msg = ex.getMessage();
+        String msg = "Unexpected exception";
 
         if (ex instanceof ValidationException) {
             msg = ((ValidationException) ex).getBindingResult().getFieldErrors().stream().map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage()).collect(Collectors.joining("; "));
@@ -57,6 +68,18 @@ public class ExceptionAdvice {
             msg = "SQL exception";
         }
 
-        return "Unexpected exception";
+        if (ex instanceof HttpMessageNotReadableException) {
+            msg = "Bad request: " + ex.getMessage();
+        }
+
+        if (ex instanceof SecurityException) {
+            msg = ex.getMessage();
+        }
+
+        if (ex instanceof AuthorizationDeniedException) {
+            msg = ex.getMessage();
+        }
+
+        return msg;
     }
 }

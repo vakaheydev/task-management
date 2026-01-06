@@ -8,9 +8,11 @@ import com.vaka.daily.exception.notfound.UserNotFoundException;
 import com.vaka.daily.repository.ScheduleRepository;
 import com.vaka.daily.repository.TaskTypeRepository;
 import com.vaka.daily.repository.UserRepository;
+import com.vaka.daily.security.SecurityUtils;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,18 +36,30 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<Schedule> getAll() {
-        return scheduleRepository.findAll();
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return scheduleRepository.findAll();
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Schedule getById(Integer id) {
-        var temp = scheduleRepository.findById(id);
-        return temp.orElseThrow(() -> new ScheduleNotFoundException("id", id));
+        Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new ScheduleNotFoundException("id", id));
+        if (SecurityUtils.currentUserHasRole("ADMIN") || schedule.getUserId().equals(SecurityUtils.currentUser().getId())) {
+            return schedule;
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public List<Schedule> getByName(String name) {
-        return scheduleRepository.findByName(name);
+        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+            return scheduleRepository.findByName(name);
+        }
+
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -59,42 +73,44 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<Schedule> getByUserId(Integer id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("id", id);
+        if (SecurityUtils.currentUserHasRole("ADMIN") || id.equals(SecurityUtils.currentUser().getId())) {
+            if (!userRepository.existsById(id)) {
+                throw new UserNotFoundException("id", id);
+            }
+
+            return scheduleRepository.findByUserId(id);
         }
 
-        return scheduleRepository.findByUserId(id);
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Schedule create(Schedule entity) {
-        if (entity.getUser() == null) {
-            throw new ValidationException("Schedule with null user");
+        if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getUser().getId().equals(SecurityUtils.currentUser().getId())) {
+            if (entity.getUser() == null) {
+                throw new ValidationException("Schedule with null user");
+            }
+
+            if (entity.getTasks() == null) {
+                entity.setTasks(new ArrayList<>());
+            }
+
+            return scheduleRepository.save(entity);
         }
 
-        if (entity.getTasks() == null) {
-            entity.setTasks(new ArrayList<>());
-        }
-
-        return scheduleRepository.save(entity);
+        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Schedule updateById(Integer id, Schedule entity) {
-        if (!scheduleRepository.existsById(id)) {
-            throw new ScheduleNotFoundException("id", id);
-        }
-
+        getById(id); // Check authorization and existence
         entity.setId(id);
         return scheduleRepository.save(entity);
     }
 
     @Override
     public void deleteById(Integer id) {
-        if (!scheduleRepository.existsById(id)) {
-            throw new ScheduleNotFoundException("id", id);
-        }
-
+        getById(id); // Check authorization and existence
         scheduleRepository.deleteById(id);
     }
 

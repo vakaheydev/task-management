@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,21 +32,25 @@ public class TaskController {
         this.taskMapper = taskMapper;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(taskService.getAll().stream().map(taskMapper::toDto));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(taskMapper.toDto(taskService.getById(id)));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}/notification")
     public ResponseEntity<?> getByIdNotification(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(taskNotificationService.getByTaskId(id));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}/notification")
     public ResponseEntity<?> updateNotification(@PathVariable("id") Integer id,
                                                 @RequestBody @Valid TaskNotification taskNotification,
@@ -72,6 +77,7 @@ public class TaskController {
 //        return ResponseEntity.ok(service.getByUserId(userId));
 //    }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody @Valid TaskDto taskDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -83,6 +89,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(taskService.create(task));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateById(@PathVariable("id") Integer id, @RequestBody @Valid TaskDto taskDto,
                                         BindingResult bindingResult) {
@@ -95,6 +102,7 @@ public class TaskController {
         return ResponseEntity.ok(taskMapper.toDto(updated));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") Integer id) {
         taskService.deleteById(id);

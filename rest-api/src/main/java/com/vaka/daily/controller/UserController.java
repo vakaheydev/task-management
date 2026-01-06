@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,16 +24,19 @@ public class UserController {
         this.service = service;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<?> search(
             @RequestParam(name = "user_type_name", required = false) String userTypeName,
@@ -50,6 +54,7 @@ public class UserController {
         // TODO: 6/19/2024 Implements criteria and specifications
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -59,6 +64,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(user));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/dto")
     public ResponseEntity<?> createFromDTO(@RequestBody @Valid UserDto userDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -68,6 +74,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createFromDTO(userDTO));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateById(@PathVariable("id") Integer id, @RequestBody @Valid User user,
                                         BindingResult bindingResult) {
@@ -78,6 +85,7 @@ public class UserController {
         return ResponseEntity.ok(service.updateById(id, user));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") Integer id) {
         service.deleteById(id);
