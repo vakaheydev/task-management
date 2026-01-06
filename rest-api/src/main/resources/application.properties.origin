@@ -26,7 +26,7 @@ spring.jpa.properties.hibernate.event.merge.entity_copy_observer=allow
 # ============================
 logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=WARN
 logging.level.org.springframework.http.converter.json=DEBUG
-logging.level.com.vaka.daily=DEBUG
+logging.level.com.vaka.daily=INFO
 
 # ============================
 #           Telegram
@@ -40,5 +40,10 @@ telegram.binding.enabled=${TG_BINDING_ENABLED:true}
 # ============================
 notificaton.enabled=${NOTIFICATION_ENABLED:true}
 
-
-
+# ============================
+#             Security / JWT
+# ============================
+# Secret used to sign JWT tokens (override in environment for production)
+jwt.secret=${JWT_SECRET}
+# Token validity in milliseconds (e.g. 3600000 = 1 hour, 86400000 = 1 day (24 hours))
+jwt.expiration=${JWT_EXPIRATION:86400000}
