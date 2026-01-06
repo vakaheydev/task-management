@@ -36,30 +36,30 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<Schedule> getAll() {
-        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER")) {
             return scheduleRepository.findAll();
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Schedule getById(Integer id) {
         Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new ScheduleNotFoundException("id", id));
-        if (SecurityUtils.currentUserHasRole("ADMIN") || schedule.getUserId().equals(SecurityUtils.currentUser().getId())) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER") || schedule.getUserId().equals(SecurityUtils.currentUser().getId())) {
             return schedule;
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public List<Schedule> getByName(String name) {
         if (SecurityUtils.currentUserHasRole("ADMIN")) {
             return scheduleRepository.findByName(name);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -79,9 +79,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             }
 
             return scheduleRepository.findByUserId(id);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -96,9 +96,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             }
 
             return scheduleRepository.save(entity);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override

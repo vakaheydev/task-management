@@ -11,7 +11,7 @@ import com.vaka.daily.telegram.TelegramClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authorization.AuthorizationDeniedException;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,16 +23,18 @@ public class UserServiceImpl implements UserService {
     private final UserTypeService userTypeService;
     private final ScheduleService scheduleService;
     private final TelegramClient telegramClient;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            UserTypeService userTypeService,
                            ScheduleService scheduleService,
-                           TelegramClient telegramClient) {
+                           TelegramClient telegramClient, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userTypeService = userTypeService;
         this.scheduleService = scheduleService;
         this.telegramClient = telegramClient;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -46,51 +48,61 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Integer id) {
-        if (SecurityUtils.currentUserHasRole("ADMIN") || SecurityUtils.currentUser().getId().equals(id)) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER") || SecurityUtils.currentUser().getId().equals(id)) {
             return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("id", id));
-        }
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
 
-        throw new AuthorizationDeniedException("Access denied");
+        }
     }
 
     @Override
     public User getByUniqueName(String login) {
         if (SecurityUtils.currentUserHasRole("ADMIN") || SecurityUtils.currentUser().getUsername().equals(login)) {
             return userRepository.findByLogin(login).orElseThrow(() -> new UserNotFoundException("name", login));
-        }
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
 
-        throw new AuthorizationDeniedException("Access denied");
+        }
     }
 
     @Override
     public User getByTgId(Long tgId) {
         if (SecurityUtils.currentUserHasRole("ADMIN")) {
             return userRepository.findByTelegramId(tgId).orElseThrow(() -> new UserNotFoundException("telegramId", tgId));
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public List<User> getByUserTypeName(String userTypeName) {
         if (SecurityUtils.currentUserHasRole("ADMIN")) {
             return userRepository.findByUserTypeName(userTypeName);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public User createFromDTO(UserDto userDTO) {
         User user = convertFromDTO(userDTO);
-
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         UserType defaultUserType = userTypeService.getDefaultUserType();
         user.setUserType(defaultUserType);
 
         Schedule schedule = scheduleService.createDefaultSchedule(user);
         user.addSchedule(schedule);
 
+        checkUserLogin(userDTO.getLogin());
         return userRepository.save(user);
+    }
+
+    private void checkUserLogin(String login) {
+        User sameUser = userRepository.findByLogin(login).orElse(null);
+        if (sameUser != null) {
+            throw new IllegalArgumentException("User with login " + login + " already exists");
+        }
     }
 
     @Override
@@ -100,6 +112,8 @@ public class UserServiceImpl implements UserService {
             entity.setUserType(defaultUserType);
         }
 
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        checkUserLogin(entity.getLogin());
         User saved = userRepository.save(entity);
 
         if (entity.getSchedules().isEmpty()) {
@@ -129,9 +143,9 @@ public class UserServiceImpl implements UserService {
                 throw new UserNotFoundException("id", id);
             }
             userRepository.deleteById(id);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     private User convertFromDTO(UserDto userDTO) {

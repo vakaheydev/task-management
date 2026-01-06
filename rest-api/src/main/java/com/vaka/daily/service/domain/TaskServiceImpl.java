@@ -22,11 +22,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<Task> getAll() {
-        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER")) {
             return taskRepository.findAll();
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -34,32 +34,32 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("id", id));
         if (SecurityUtils.currentUserHasRole("ADMIN") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             return task;
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Task create(Task entity) {
         if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             return taskRepository.save(entity);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public Task updateById(Integer id, Task entity) {
-        if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN") || entity.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             if (!taskRepository.existsById(id)) {
                 throw new TaskNotFoundException("id", id);
             }
 
             entity.setId(id);
             return taskRepository.save(entity);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -67,8 +67,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("id", id));
         if (SecurityUtils.currentUserHasRole("ADMIN") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             taskRepository.deleteById(id);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 }

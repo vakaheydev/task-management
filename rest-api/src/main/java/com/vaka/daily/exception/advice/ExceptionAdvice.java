@@ -80,6 +80,10 @@ public class ExceptionAdvice {
             msg = ex.getMessage();
         }
 
+        if (ex instanceof IllegalArgumentException) {
+            msg = ex.getMessage();
+        }
+
         return msg;
     }
 }

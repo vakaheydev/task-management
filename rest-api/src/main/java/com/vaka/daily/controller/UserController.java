@@ -30,7 +30,7 @@ public class UserController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(service.getById(id));

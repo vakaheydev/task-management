@@ -1,5 +1,6 @@
 package com.vaka.daily.security;
 
+import com.vaka.daily.domain.dto.JwtResponse;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -36,16 +37,18 @@ public class JwtUtil {
         return sb.toString();
     }
 
-    public String generateToken(String username) {
+    public JwtResponse generateToken(String username) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        return new JwtResponse(token, expiry.toInstant());
     }
 
     public String extractUsername(String token) {

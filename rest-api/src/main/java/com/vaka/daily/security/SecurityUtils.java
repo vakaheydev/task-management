@@ -35,4 +35,16 @@ public class SecurityUtils {
         return authorities.stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role));
     }
+
+    public static boolean currentUserHasAnyRole(String... roles) {
+        Collection<? extends GrantedAuthority> authorities =
+                roleHierarchy.getReachableGrantedAuthorities(currentUser().getAuthorities());
+        for (String role : roles) {
+            if (authorities.stream()
+                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role))) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

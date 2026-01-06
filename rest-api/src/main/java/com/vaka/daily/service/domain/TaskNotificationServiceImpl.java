@@ -25,23 +25,23 @@ public class TaskNotificationServiceImpl implements TaskNotificationService {
     public List<TaskNotification> getAll() {
         if (SecurityUtils.currentUserHasRole("ADMIN")) {
             return repository.findAll();
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification getById(Integer id) {
         if (SecurityUtils.currentUserHasRole("ADMIN")) {
             return repository.findById(id).orElseThrow(() -> new TaskNotificationNotFoundException("id", id));
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification updateTaskNotification(Integer taskId, TaskNotification taskNotification) {
-        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER")) {
             Optional<TaskNotification> optionalTaskNotification = repository.findByTaskId(taskId);
             if (optionalTaskNotification.isPresent()) {
                 TaskNotification existingNotification = optionalTaskNotification.get();
@@ -53,28 +53,28 @@ public class TaskNotificationServiceImpl implements TaskNotificationService {
                 repository.save(taskNotification);
                 return taskNotification;
             }
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification getByTaskId(Integer taskId) {
         TaskNotification taskNotification = repository.findByTaskId(taskId).orElseThrow(() -> new TaskNotFoundException("id", taskId));
-        if (SecurityUtils.currentUserHasRole("ADMIN") || taskNotification.getTask().getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER") || taskNotification.getTask().getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             return taskNotification;
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
     public TaskNotification create(TaskNotification entity) {
         if (SecurityUtils.currentUserHasRole("ADMIN") || entity.getTask().getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             return repository.save(entity);
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 
     @Override
@@ -94,8 +94,8 @@ public class TaskNotificationServiceImpl implements TaskNotificationService {
     public List<Task> getTasksForNotification() {
         if (SecurityUtils.currentUserHasRole("NOTIFIER")) {
             return repository.findTasksForNotification(LocalDateTime.now());
+        } else {
+            throw new AuthorizationDeniedException("Access denied");
         }
-
-        throw new AuthorizationDeniedException("Access denied");
     }
 }

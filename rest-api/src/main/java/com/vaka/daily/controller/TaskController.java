@@ -32,7 +32,7 @@ public class TaskController {
         this.taskMapper = taskMapper;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NOTIFIER')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(taskService.getAll().stream().map(taskMapper::toDto));
@@ -44,13 +44,13 @@ public class TaskController {
         return ResponseEntity.ok(taskMapper.toDto(taskService.getById(id)));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER')")
     @GetMapping("/{id}/notification")
     public ResponseEntity<?> getByIdNotification(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(taskNotificationService.getByTaskId(id));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER')")
     @PutMapping("/{id}/notification")
     public ResponseEntity<?> updateNotification(@PathVariable("id") Integer id,
                                                 @RequestBody @Valid TaskNotification taskNotification,

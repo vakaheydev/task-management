@@ -1,7 +1,7 @@
 package com.vaka.daily.controller;
 
+import com.vaka.daily.domain.dto.JwtResponse;
 import com.vaka.daily.domain.dto.AuthRequest;
-import com.vaka.daily.domain.dto.AuthResponse;
 import com.vaka.daily.security.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +35,29 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            String token = jwtUtil.generateToken(request.getUsername());
-            return ResponseEntity.ok(new AuthResponse(token));
+            JwtResponse token = jwtUtil.generateToken(request.getUsername());
+            return ResponseEntity.ok(token);
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(401).body(java.util.Map.of(
                     "status", 401,
                     "message", "Invalid username or password"
+            ));
+        }
+    }
+
+    @PostMapping("/service")
+    public ResponseEntity<?> serviceLogin(@Valid @RequestBody AuthRequest request) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+
+            JwtResponse token = jwtUtil.generateToken(request.getUsername());
+            return ResponseEntity.ok(token);
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(401).body(java.util.Map.of(
+                    "status", 401,
+                    "message", "Invalid service credentials"
             ));
         }
     }

@@ -38,6 +38,7 @@ public class NotificationService {
             taskTypeCache.put(taskType.getId(), taskType);
         }
 
+        Map<Integer, String> cache = new HashMap<>();
         for (Task task : tasks) {
             TaskNotification taskNotification = api.getTaskNotificationByTaskId(task.getId());
             TaskType taskType = taskTypeCache.get(task.getTaskTypeId());
@@ -45,7 +46,7 @@ public class NotificationService {
                 log.error("Unknown task type: {}, it will be skipped", task.getTaskTypeId());
                 continue;
             }
-            Notification notification = resolveNotification(task, taskType, taskNotification);
+            Notification notification = resolveNotification(task, taskType, taskNotification, cache);
             if (notification != null) {
                 notifications.add(notification);
             }
@@ -56,16 +57,30 @@ public class NotificationService {
     }
 
 
-    private Notification resolveNotification(Task task, TaskType taskType, TaskNotification taskNotification) {
+    private Notification resolveNotification(Task task, TaskType taskType, TaskNotification taskNotification, Map<Integer, String> cache) {
         if (notificationResolverFactory.getNotificationResolver(taskType).shouldNotify(task, taskNotification)) {
-            return resolveTelegramNotification(task, taskType);
+            return resolveTelegramNotification(task, taskType, cache);
         }
 
         return null;
     }
 
-    private Notification resolveTelegramNotification(Task task, TaskType taskType) {
+    private Notification resolveTelegramNotification(Task task, TaskType taskType, Map<Integer, String> cache) {
         int scheduleId = task.getScheduleId();
+
+        if (cache.containsKey(scheduleId)) {
+            String cachedTgId = cache.get(scheduleId);
+            if (cachedTgId != null) {
+                return Notification.builder()
+                        .chanel("telegram")
+                        .chanelUserId(cachedTgId)
+                        .message(formatNotificationService.formatTaskForNotification(task, taskType))
+                        .timestamp(LocalDateTime.now())
+                        .taskId(task.getId())
+                        .build();
+            }
+        }
+
         Optional<Long> optTgId = api.getTelegramIdByScheduleId(scheduleId);
 
         if (optTgId.isEmpty()) {
@@ -73,7 +88,7 @@ public class NotificationService {
         }
 
         long telegramId = optTgId.get();
-
+        cache.put(scheduleId, Long.toString(telegramId));
         return Notification.builder()
                 .chanel("telegram")
                 .chanelUserId(Long.toString(telegramId))
