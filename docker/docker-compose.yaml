@@ -43,6 +43,7 @@ services:
       - "${NOTIFIER_PORT}:8090"
     depends_on:
       - rest-api
+      - broker
 
   tg-bot:
     container_name: tg-bot
@@ -54,6 +55,7 @@ services:
       KAFKA_BOOTSTRAP_PORT: 29092
       KAFKA_TOPIC: telegram
       KAFKA_GROUP_ID: tg-bot-group
+      API_BASE_URL: http://rest-api:{REST_API_PORT}
 
     ports:
       - "${TG_BOT_PORT}:8989"

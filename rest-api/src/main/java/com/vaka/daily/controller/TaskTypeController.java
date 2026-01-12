@@ -23,7 +23,7 @@ public class TaskTypeController {
         this.taskTypeService = taskTypeService;
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER', 'TELEGRAM')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(taskTypeService.getAll());

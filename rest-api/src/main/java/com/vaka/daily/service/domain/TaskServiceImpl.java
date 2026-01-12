@@ -22,7 +22,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<Task> getAll() {
-        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER")) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER", "TELEGRAM")) {
             return taskRepository.findAll();
         } else {
             throw new AuthorizationDeniedException("Access denied");
@@ -32,7 +32,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task getById(Integer id) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("id", id));
-        if (SecurityUtils.currentUserHasRole("ADMIN") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "TELEGRAM") || task.getSchedule().getUserId().equals(SecurityUtils.currentUser().getId())) {
             return task;
         } else {
             throw new AuthorizationDeniedException("Access denied");

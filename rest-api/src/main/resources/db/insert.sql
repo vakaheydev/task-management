@@ -1,19 +1,21 @@
 INSERT INTO user_type (user_type_name)
 VALUES ('USER'),
        ('VIP'),
-       ('NOTIFIER'),
        ('ADMIN'),
-       ('DEVELOPER');
+       ('DEVELOPER'),
+       ('NOTIFIER'),
+       ('TELEGRAM');
 
 INSERT INTO daily_user (user_login, user_password, user_first_name, user_second_name,
                         user_patronymic, user_telegram_id, id_user_type)
-VALUES ('vaka', '$2a$10$IyiJtGoKbpWRt9PqN96pf.JjvCnVB7zXgvV9KDb7Z7M.5QFqUh32a', 'Иван', 'Новгородов', 'Андреевич', 1531192384, 5),
+VALUES ('vaka', '$2a$10$IyiJtGoKbpWRt9PqN96pf.JjvCnVB7zXgvV9KDb7Z7M.5QFqUh32a', 'Иван', 'Новгородов', 'Андреевич', 1531192384, 4),
        ('retere', '$2a$10$3NtBOtOptorrVYJA1.5gQ.2hfINYxYEqourxFWPTISCde0bF52jtW', 'Павел', 'Новгородов', 'Андреевич', 5393306493, 1);
 
 INSERT INTO daily_user (user_login, user_password, user_first_name, user_second_name,
                         user_patronymic, id_user_type)
 VALUES ('aka', '$2a$10$LlvbV5ZNIzNrZLv4YEEx0OzK7cFF6RRCGvgIGm66FEYkXWObGgpSi', 'Анна', 'Новгородова', 'Андреевна', 1),
-       ('notifier', '$2a$10$oJCfShOgbDmf4nH6jJ8s9uT/ispBpMNC/VOENI04BiPxNFr1GZEme', 'notifier', 'notifier', 'notifier', 3);
+       ('notifier', '$2a$10$oJCfShOgbDmf4nH6jJ8s9uT/ispBpMNC/VOENI04BiPxNFr1GZEme', 'notifier', 'notifier', 'notifier', 5),
+       ('telegram', '$2a$10$OT54y3cbnlqS10tuZZPkD.AGKDnH4Rq.Hbe58RfnlIERsO/xnRBr2', 'telegram', 'telegram', 'telegram', 6);
 
 INSERT INTO schedule (schedule_name, id_user)
 VALUES ('main', 1),

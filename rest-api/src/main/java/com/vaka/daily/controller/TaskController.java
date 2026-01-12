@@ -32,13 +32,13 @@ public class TaskController {
         this.taskMapper = taskMapper;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'NOTIFIER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NOTIFIER', 'TELEGRAM')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(taskService.getAll().stream().map(taskMapper::toDto));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER', 'TELEGRAM')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(taskMapper.toDto(taskService.getById(id)));

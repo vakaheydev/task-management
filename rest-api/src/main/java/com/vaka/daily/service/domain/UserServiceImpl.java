@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Integer id) {
-        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER") || SecurityUtils.currentUser().getId().equals(id)) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "NOTIFIER", "TELEGRAM") || SecurityUtils.currentUser().getId().equals(id)) {
             return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("id", id));
         } else {
             throw new AuthorizationDeniedException("Access denied");
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUniqueName(String login) {
-        if (SecurityUtils.currentUserHasRole("ADMIN") || SecurityUtils.currentUser().getUsername().equals(login)) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "TELEGRAM") || SecurityUtils.currentUser().getUsername().equals(login)) {
             return userRepository.findByLogin(login).orElseThrow(() -> new UserNotFoundException("name", login));
         } else {
             throw new AuthorizationDeniedException("Access denied");
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByTgId(Long tgId) {
-        if (SecurityUtils.currentUserHasRole("ADMIN")) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "TELEGRAM")) {
             return userRepository.findByTelegramId(tgId).orElseThrow(() -> new UserNotFoundException("telegramId", tgId));
         } else {
             throw new AuthorizationDeniedException("Access denied");

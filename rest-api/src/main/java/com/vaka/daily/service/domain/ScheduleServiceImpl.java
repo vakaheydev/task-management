@@ -73,7 +73,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     public List<Schedule> getByUserId(Integer id) {
-        if (SecurityUtils.currentUserHasRole("ADMIN") || id.equals(SecurityUtils.currentUser().getId())) {
+        if (SecurityUtils.currentUserHasAnyRole("ADMIN", "TELEGRAM") || id.equals(SecurityUtils.currentUser().getId())) {
             if (!userRepository.existsById(id)) {
                 throw new UserNotFoundException("id", id);
             }
