@@ -116,6 +116,7 @@ public class OAuth2AuthorizationServerConfig {
                 .redirectUri(chatgptRedirectUri)
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
+                .scope("claudeai")
                 .clientSettings(ClientSettings.builder()
                         .requireAuthorizationConsent(false)
                         .requireProofKey(false)
