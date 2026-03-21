@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mvn dependency:tree -pl rest-api)",
+      "Bash(find ~/.m2/repository/org/springframework/ai -name *.jar -path *1.1.2*)",
+      "Bash(find ~/.m2/repository/org/springframework/ai/spring-ai-starter-mcp-server-webmvc -name *.jar)",
+      "Bash(python3:*)"
+    ]
+  }
+}
