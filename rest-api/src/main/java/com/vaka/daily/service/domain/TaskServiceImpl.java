@@ -71,4 +71,10 @@ public class TaskServiceImpl implements TaskService {
             throw new AuthorizationDeniedException("Access denied");
         }
     }
+
+    @Override
+    public List<Task> searchByName(String name) {
+        Integer userId = SecurityUtils.currentUser().getId();
+        return taskRepository.findByUserIdAndNameContaining(userId, name);
+    }
 }
