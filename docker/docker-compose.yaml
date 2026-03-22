@@ -1,8 +1,21 @@
 services:
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - rest-api
+
   rest-api:
     container_name: rest-api
     build:
-      context: ../rest-api
+      context: ..
+      dockerfile: docker/rest-api/Dockerfile
     image: vakadev/daily-rest-api:latest
     environment:
       DB_HOST: db
@@ -20,9 +33,7 @@ services:
       TG_BOT_PORT: 8889
       TG_BOT_ENABLED: true
 
-    # Проброс порта можно убрать, чтобы запретить использование REST API вне localhost
-    ports:
-      - "${REST_API_PORT}:8080"
+    # Порт не пробрасывается наружу — доступ только через nginx
     depends_on:
       - db
 
