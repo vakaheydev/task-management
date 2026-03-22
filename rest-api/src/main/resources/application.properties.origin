@@ -6,6 +6,7 @@
 #           Server
 # ============================
 server.port=${REST_API_PORT:8080}
+server.forward-headers-strategy=framework
 
 # ============================
 #         Data Source
@@ -20,6 +21,29 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 # ============================
 spring.jpa.hibernate.ddl-auto=none
 spring.jpa.properties.hibernate.event.merge.entity_copy_observer=allow
+
+#         OAuth2 / MCP
+# ============================
+oauth2.issuer=${OAUTH2_ISSUER:https://vaka-daily.ru}
+
+# Claude
+oauth2.claude.client.id=${OAUTH2_CLIENT_ID:claude-mcp-client}
+oauth2.claude.client.secret=${OAUTH2_CLIENT_SECRET:change-this-secret}
+oauth2.claude.client.redirect-uri=${OAUTH2_REDIRECT_URI:https://claude.ai/api/mcp/auth_callback}
+
+# ChatGPT
+oauth2.chatgpt.client.id=${OAUTH2_CHATGPT_CLIENT_ID:chatgpt-mcp-client}
+oauth2.chatgpt.client.secret=${OAUTH2_CHATGPT_CLIENT_SECRET:change-this-secret}
+oauth2.chatgpt.client.redirect-uri=${OAUTH2_CHATGPT_REDIRECT_URI:https://chatgpt.com/connector/oauth/3UjaNb_hFp4T}
+
+# ============================
+#           MCP Server
+# ============================
+spring.ai.mcp.server.enabled=true
+spring.ai.mcp.server.name=task-management
+spring.ai.mcp.server.version=1.0.0
+spring.ai.mcp.server.type=SYNC
+spring.ai.mcp.server.sse-message-endpoint=/mcp/message
 
 # ============================
 #           Logging
