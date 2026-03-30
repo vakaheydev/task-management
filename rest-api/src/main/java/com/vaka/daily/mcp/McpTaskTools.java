@@ -1,9 +1,13 @@
 package com.vaka.daily.mcp;
 
+import com.vaka.daily.domain.Schedule;
 import com.vaka.daily.domain.Task;
+import com.vaka.daily.domain.dto.ScheduleDto;
 import com.vaka.daily.domain.dto.TaskDto;
+import com.vaka.daily.domain.mapper.ScheduleMapper;
 import com.vaka.daily.domain.mapper.TaskMapper;
 import com.vaka.daily.service.domain.MeService;
+import com.vaka.daily.service.domain.ScheduleService;
 import com.vaka.daily.service.domain.TaskService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -18,11 +22,16 @@ public class McpTaskTools {
     private final TaskService taskService;
     private final MeService meService;
     private final TaskMapper taskMapper;
+    private final ScheduleService scheduleService;
+    private final ScheduleMapper scheduleMapper;
 
-    public McpTaskTools(TaskService taskService, MeService meService, TaskMapper taskMapper) {
+    public McpTaskTools(TaskService taskService, MeService meService, TaskMapper taskMapper,
+                        ScheduleService scheduleService, ScheduleMapper scheduleMapper) {
         this.taskService = taskService;
         this.meService = meService;
         this.taskMapper = taskMapper;
+        this.scheduleService = scheduleService;
+        this.scheduleMapper = scheduleMapper;
     }
 
     @Tool(description = "Get all tasks of the current authenticated user")
@@ -95,5 +104,28 @@ public class McpTaskTools {
         return taskService.searchByName(name).stream()
                 .map(taskMapper::toDto)
                 .toList();
+    }
+
+    @Tool(description = "Get all schedules of the current authenticated user")
+    public List<ScheduleDto> getMySchedules() {
+        return meService.getMySchedules().stream()
+                .map(scheduleMapper::toDto)
+                .toList();
+    }
+
+    @Tool(description = "Create a new schedule for the current user")
+    public ScheduleDto createSchedule(
+            @ToolParam(description = "Schedule name (max 100 chars)") String name) {
+        Schedule schedule = new Schedule(name, meService.getMe());
+        return scheduleMapper.toDto(scheduleService.create(schedule));
+    }
+
+    @Tool(description = "Move a task to a different schedule")
+    public TaskDto moveTaskToSchedule(
+            @ToolParam(description = "Task ID") Integer taskId,
+            @ToolParam(description = "Target schedule ID") Integer scheduleId) {
+        Task task = taskService.getById(taskId);
+        task.setSchedule(scheduleService.getById(scheduleId));
+        return taskMapper.toDto(taskService.updateById(taskId, task));
     }
 }
