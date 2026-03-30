@@ -103,7 +103,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
 
   notifier:
     container_name: notifier
@@ -124,6 +124,8 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://api.polza.ai/api/v1}
 
       TZ: Europe/Moscow
+    ports:
+      - "8090:8088"
     depends_on:
       - rest-api
       - broker

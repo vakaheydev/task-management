@@ -1,13 +1,6 @@
 FROM postgres
 
-RUN mkdir /sql-scripts
+COPY ./rest-api/src/main/resources/db /sql
 
-WORKDIR /sql-scripts
-
-COPY db-scripts/sql /docker-entrypoint-initdb.d/
-
-RUN chmod +x /docker-entrypoint-initdb.d/*
-
-COPY db-scripts .
-
-RUN chmod +x /sql-scripts/re-create.sh
+COPY ./docker/db/db-scripts/re-create.sh /re-create.sh
+RUN chmod +x /re-create.sh
