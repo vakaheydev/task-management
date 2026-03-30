@@ -75,7 +75,7 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", deadline=" + deadline +
-                ", status=" + isCompleted +
+                ", isCompleted=" + isCompleted +
                 ", schedule=(" + schedule.getId() + "," + schedule.getName() +
                 "), taskType=(" + taskType.toString() +
                 ")}";

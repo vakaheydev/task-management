@@ -17,9 +17,11 @@ import org.springframework.web.client.RestClient;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -132,6 +134,50 @@ public class ApiClientService {
             log.error("Failed to parse tasks response: {}", e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    public boolean isAdmin(String userToken) {
+        try {
+            Set<Integer> privilegedTypeIds = resolvePrivilegedUserTypeIds();
+            if (privilegedTypeIds.isEmpty()) return false;
+
+            String meResponse = restClient.get()
+                    .uri("/me")
+                    .header("Authorization", "Bearer " + userToken)
+                    .retrieve()
+                    .body(String.class);
+            if (meResponse == null) return false;
+
+            JsonNode meNode = objectMapper.readTree(meResponse);
+            int userTypeId = meNode.path("userTypeId").asInt(-1);
+            return privilegedTypeIds.contains(userTypeId);
+        } catch (Exception e) {
+            log.warn("Failed to validate admin token: {}", e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private Set<Integer> resolvePrivilegedUserTypeIds() {
+        authorizeIfNeeded();
+        Set<Integer> ids = new HashSet<>();
+        try {
+            String response = restClient.get()
+                    .uri("/user_type")
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .body(String.class);
+            if (response == null) return ids;
+            JsonNode array = objectMapper.readTree(response);
+            for (JsonNode node : array) {
+                String name = node.path("name").asText();
+                if ("ADMIN".equalsIgnoreCase(name) || "DEVELOPER".equalsIgnoreCase(name)) {
+                    ids.add(node.path("id").asInt());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch user types: {}", e.getMessage());
+        }
+        return ids;
     }
 
     public List<Task> getTasksForUser(Integer userId) {

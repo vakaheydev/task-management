@@ -15,7 +15,7 @@ public interface TaskNotificationRepository extends JpaRepository<TaskNotificati
     Optional<TaskNotification> findByTaskId(@Param("taskId") Integer taskId);
 
     @Query("select t from Task t where " +
-            "(t.status = false and t.deadline > :now) or " +
-            "(t.status = false and t.taskType.id = 2)")
+            "(t.isCompleted = false and t.deadline > :now) or " +
+            "(t.isCompleted = false and t.taskType.id = 2)")
     List<Task> findTasksForNotification(@Param("now") LocalDateTime now);
 }

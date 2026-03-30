@@ -115,7 +115,7 @@ public class DailySummaryService {
 
     private List<Task> getIncompleteTasks(Integer userId) {
         return apiClient.getTasksForUser(userId).stream()
-                .filter(task -> Boolean.FALSE.equals(task.getStatus()))
+                .filter(task -> Boolean.FALSE.equals(task.getIsCompleted()))
                 .toList();
     }
 }

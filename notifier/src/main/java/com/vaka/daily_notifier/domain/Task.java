@@ -26,7 +26,7 @@ public class Task {
     @NotNull
     private LocalDateTime deadline;
 
-    private Boolean status;
+    private Boolean isCompleted;
 
     @NotNull
     private Integer scheduleId;

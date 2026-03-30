@@ -23,7 +23,7 @@ public class UserTypeController {
         this.service = service;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'NOTIFIER', 'TELEGRAM')")
     @GetMapping
     public ResponseEntity<?> get() {
         return ResponseEntity.ok(service.getAll());
