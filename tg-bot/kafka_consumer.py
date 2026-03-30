@@ -22,7 +22,7 @@ async def consume_notifications(kafka_host, kafka_port, kafka_topic, kafka_group
     try:
         async for msg in consumer:
             data = msg.value
-            print(f"Received message: {data[:10]}")
+            print(f"Received message for user: {data.get('chanelUserId')}, offset={msg.offset}, ts={msg.timestamp}")
             user_id = data['chanelUserId'] 
             text = data['message']
             if user_id and text:
