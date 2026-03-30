@@ -14,4 +14,6 @@ public interface UserService extends CommonService<User> {
     User createFromDTO(UserDto userDTO);
 
     User getByTgId(Long tgId);
+
+    void changePassword(String oldPassword, String newPassword);
 }

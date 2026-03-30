@@ -57,7 +57,7 @@ public class McpTaskTools {
                 .name(name)
                 .description(description)
                 .deadline(LocalDateTime.parse(deadline))
-                .status(false)
+                .isCompleted(false)
                 .scheduleId(scheduleId)
                 .taskTypeId(taskTypeId)
                 .build();
@@ -68,7 +68,7 @@ public class McpTaskTools {
     @Tool(description = "Mark a task as completed (status = true)")
     public TaskDto completeTask(@ToolParam(description = "Task ID") Integer id) {
         Task task = taskService.getById(id);
-        task.setStatus(true);
+        task.setIsCompleted(true);
         return taskMapper.toDto(taskService.updateById(id, task));
     }
 
@@ -85,7 +85,7 @@ public class McpTaskTools {
                 .name(name)
                 .description(description)
                 .deadline(LocalDateTime.parse(deadline))
-                .status(status)
+                .isCompleted(status)
                 .scheduleId(scheduleId)
                 .taskTypeId(taskTypeId)
                 .build();

@@ -148,6 +148,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public void changePassword(String oldPassword, String newPassword) {
+        User user = userRepository.findById(SecurityUtils.currentUser().getId())
+                .orElseThrow(() -> new UserNotFoundException("id", SecurityUtils.currentUser().getId()));
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     private User convertFromDTO(UserDto userDTO) {
         User user = new User();
         user.setLogin(userDTO.getLogin());

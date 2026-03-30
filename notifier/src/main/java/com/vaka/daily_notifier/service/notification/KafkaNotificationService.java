@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaka.daily_notifier.domain.Notification;
 import com.vaka.daily_notifier.domain.TaskNotification;
+import java.time.LocalDateTime;
 import com.vaka.daily_notifier.service.client.ApiClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,6 +23,21 @@ public class KafkaNotificationService {
         this.api = api;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
+    }
+
+    public void sendSummary(String message, String telegramUserId) {
+        Notification notification = Notification.builder()
+                .message(message)
+                .chanel("telegram")
+                .chanelUserId(telegramUserId)
+                .timestamp(LocalDateTime.now())
+                .build();
+        try {
+            String json = objectMapper.writeValueAsString(notification);
+            kafkaTemplate.send("telegram", json).get();
+        } catch (Exception e) {
+            log.error("Failed to send daily summary to kafka for user {}: {}", telegramUserId, e.getMessage());
+        }
     }
 
     public void sendNotifications(List<Notification> notifications) {

@@ -18,7 +18,7 @@ public class NotificationScheduler {
         this.service = service;
     }
 
-    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.SECONDS)
+    // @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.SECONDS)
     public void notifyUsers() {
         log.info("Started notification scheduler");
         service.notifyUsers();

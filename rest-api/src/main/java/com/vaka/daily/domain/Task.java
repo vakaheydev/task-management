@@ -36,7 +36,7 @@ public class Task {
     private LocalDateTime deadline;
 
     @Column(name = "task_status")
-    private Boolean status;
+    private Boolean isCompleted;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -75,7 +75,7 @@ public class Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", deadline=" + deadline +
-                ", status=" + status +
+                ", status=" + isCompleted +
                 ", schedule=(" + schedule.getId() + "," + schedule.getName() +
                 "), taskType=(" + taskType.toString() +
                 ")}";

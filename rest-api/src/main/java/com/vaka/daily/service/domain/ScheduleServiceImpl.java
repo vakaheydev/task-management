@@ -121,7 +121,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .deadline(LocalDateTime.now().plusDays(7))
                 .schedule(schedule)
                 .taskType(taskTypeRepository.findByName("singular").orElseThrow())
-                .status(false)
+                .isCompleted(false)
                 .build();
     }
 }

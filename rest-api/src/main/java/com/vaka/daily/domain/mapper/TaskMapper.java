@@ -22,7 +22,7 @@ public class TaskMapper implements DtoMapper<Task, TaskDto> {
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .deadline(dto.getDeadline())
-                .status(dto.getStatus())
+                .isCompleted(dto.getIsCompleted())
                 .schedule(scheduleService.getById(dto.getScheduleId()))
                 .taskType(taskTypeService.getById(dto.getTaskTypeId()))
                 .build();
@@ -34,7 +34,7 @@ public class TaskMapper implements DtoMapper<Task, TaskDto> {
                 .name(task.getName())
                 .description(task.getDescription())
                 .deadline(task.getDeadline())
-                .status(task.getStatus())
+                .isCompleted(task.getIsCompleted())
                 .scheduleId(task.getSchedule().getId())
                 .taskTypeId(task.getTaskType().getId())
                 .build();

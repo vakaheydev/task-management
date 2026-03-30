@@ -30,7 +30,7 @@ public class TaskDto {
 
     @NotNull
     @Builder.Default
-    private Boolean status = true;
+    private Boolean isCompleted = true;
 
     @NotNull
     private Integer scheduleId;

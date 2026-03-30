@@ -16,7 +16,9 @@ import org.springframework.web.client.RestClient;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -85,7 +87,7 @@ public class ApiClientService {
         }
     }
 
-    private Optional<Long> getTelegramIdByUserId(int userId) {
+    public Optional<Long> getTelegramIdByUserId(int userId) {
         String response = getRequest("/user/" + userId, String.class);
         if (response == null || response.isBlank()) {
             return Optional.empty();
@@ -129,6 +131,30 @@ public class ApiClientService {
         } catch (JsonProcessingException e) {
             log.error("Failed to parse tasks response: {}", e.getMessage());
             return Collections.emptyList();
+        }
+    }
+
+    public List<Task> getTasksForUser(Integer userId) {
+        List<Task> allTasks = getTasks();
+        Map<Integer, Integer> scheduleUserCache = new HashMap<>();
+        return allTasks.stream()
+                .filter(task -> {
+                    Integer scheduleUserId = scheduleUserCache.computeIfAbsent(
+                            task.getScheduleId(), this::resolveUserIdByScheduleId);
+                    return userId.equals(scheduleUserId);
+                })
+                .toList();
+    }
+
+    private Integer resolveUserIdByScheduleId(int scheduleId) {
+        String response = getRequest("/schedule/" + scheduleId, String.class);
+        if (response == null || response.isBlank()) return -1;
+        try {
+            JsonNode node = objectMapper.readTree(response);
+            return node.get("userId").asInt();
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse schedule userId: {}", e.getMessage());
+            return -1;
         }
     }
 
